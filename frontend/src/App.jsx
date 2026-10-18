@@ -14,6 +14,8 @@ import SavedOpportunitiesPage from "./pages/SavedOpportunitiesPage.jsx";
 import ApplicationsPage from "./pages/ApplicationsPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
+import DeadlinesCalendarPage from "./pages/DeadlinesCalendarPage.jsx";
+import DeadlineDateOpportunitiesPage from "./pages/DeadlineDateOpportunitiesPage.jsx";
 
 export default function App() {
   return (
@@ -30,6 +32,8 @@ export default function App() {
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/opportunities" element={<OpportunityListPage />} />
                 <Route path="/opportunities/:id" element={<OpportunityDetailPage />} />
+                <Route path="/deadlines" element={<DeadlinesCalendarPage />} />
+                <Route path="/deadlines/:date" element={<DeadlineDateOpportunitiesPage />} />
                 <Route path="/saved" element={<SavedOpportunitiesPage />} />
                 <Route path="/applications" element={<ApplicationsPage />} />
                 <Route path="/login" element={<Login />} />

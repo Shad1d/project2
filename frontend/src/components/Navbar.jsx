@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Menu,
   X,
+  Calendar,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -137,6 +138,14 @@ export default function Navbar() {
 
           {/* Center / Right Links */}
           <div className="hidden md:flex items-center gap-6">
+            <Link
+              to="/deadlines"
+              data-active={location.pathname.startsWith("/deadlines")}
+              className={linkClass("/deadlines")}
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Deadlines</span>
+            </Link>
             <button
               onClick={() => handleScrollTo("closing-soon")}
               className={scrollBtnClass}
@@ -303,6 +312,15 @@ export default function Navbar() {
               style={stagger(3)}
             >
               Explore All Opportunities
+            </Link>
+            <Link
+              to="/deadlines"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`${mobileLinkClass} flex items-center gap-2`}
+              style={stagger(3.5)}
+            >
+              <Calendar className="w-4 h-4 text-[#0F8B8D]" />
+              <span>Deadlines Calendar</span>
             </Link>
 
             {isLoggedIn ? (
