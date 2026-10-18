@@ -41,6 +41,11 @@ export default function OpportunityListPage() {
   const [selectedRemote, setSelectedRemote] = useState(searchParams.get("remoteType") || searchParams.get("remote") || "");
   const [selectedEducation, setSelectedEducation] = useState(searchParams.get("education") || "");
   const [selectedDistance, setSelectedDistance] = useState(searchParams.get("maxDistance") || "");
+  const [distanceUnit, setDistanceUnit] = useState(() => {
+    const unitP = searchParams.get("unit");
+    if (unitP === "mi" || unitP === "km") return unitP;
+    return (typeof window !== "undefined" ? localStorage.getItem("nexa_distance_unit") : null) || "km";
+  });
   const [selectedSort, setSelectedSort] = useState(searchParams.get("sort") || "newest");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
@@ -96,6 +101,8 @@ export default function OpportunityListPage() {
     if (edu !== null) setSelectedEducation(edu);
     const dist = searchParams.get("maxDistance");
     if (dist !== null) setSelectedDistance(dist);
+    const u = searchParams.get("unit");
+    if (u === "mi" || u === "km") setDistanceUnit(u);
     const s = searchParams.get("sort");
     if (s !== null) setSelectedSort(s);
   }, [searchParams]);
@@ -152,7 +159,12 @@ export default function OpportunityListPage() {
       if (selectedCategory) params.category = selectedCategory;
       if (selectedRemote) params.remoteType = selectedRemote;
       if (selectedEducation) params.education = selectedEducation;
-      if (selectedDistance) params.maxDistance = selectedDistance;
+      if (selectedDistance) {
+        params.maxDistance =
+          distanceUnit === "mi"
+            ? (Number(selectedDistance) * 1.60934).toFixed(2)
+            : selectedDistance;
+      }
       if (userCoords) {
         params.lat = userCoords.lat;
         params.lng = userCoords.lng;
@@ -171,7 +183,17 @@ export default function OpportunityListPage() {
 
   useEffect(() => {
     fetchOpportunities();
-  }, [selectedCategory, selectedRemote, selectedEducation, selectedDistance, selectedSort, userCoords, page, token]);
+  }, [
+    selectedCategory,
+    selectedRemote,
+    selectedEducation,
+    selectedDistance,
+    distanceUnit,
+    selectedSort,
+    userCoords,
+    page,
+    token,
+  ]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -263,26 +285,72 @@ export default function OpportunityListPage() {
             <option value="PHD">PhD</option>
           </select>
 
-          {/* Distance Range Filter */}
-          <select
-            value={selectedDistance}
-            onChange={(e) => {
-              setSelectedDistance(e.target.value);
-              setPage(1);
-            }}
-            className={`text-xs sm:text-sm font-medium border rounded-lg px-3 py-1.5 outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${
-              selectedDistance
-                ? "bg-blue-50 border-blue-400 text-blue-800 font-semibold"
-                : "bg-white border-gray-300 text-gray-700"
-            }`}
-          >
-            <option value="">Any Distance (Global)</option>
-            <option value="10">Within 10 km (Local)</option>
-            <option value="25">Within 25 km (Metro Area)</option>
-            <option value="50">Within 50 km (Commutable)</option>
-            <option value="100">Within 100 km (Regional)</option>
-            <option value="250">Within 250 km (Statewide)</option>
-          </select>
+          {/* Distance Range Filter & Unit Switcher */}
+          <div className="flex items-center gap-1.5">
+            <select
+              value={selectedDistance}
+              onChange={(e) => {
+                setSelectedDistance(e.target.value);
+                setPage(1);
+              }}
+              className={`text-xs sm:text-sm font-medium border rounded-lg px-3 py-1.5 outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${
+                selectedDistance
+                  ? "bg-blue-50 border-blue-400 text-blue-800 font-semibold"
+                  : "bg-white border-gray-300 text-gray-700"
+              }`}
+            >
+              <option value="">Any Distance (Global)</option>
+              <option value="10">Within 10 {distanceUnit} (Local)</option>
+              <option value="25">Within 25 {distanceUnit} (Metro Area)</option>
+              <option value="50">Within 50 {distanceUnit} (Commutable)</option>
+              <option value="100">Within 100 {distanceUnit} (Regional)</option>
+              <option value="250">Within 250 {distanceUnit} (Statewide)</option>
+            </select>
+
+            {/* Switch between mile and km button */}
+            <div
+              className="inline-flex items-center bg-gray-100 border border-gray-300 rounded-lg p-0.5 text-xs font-semibold"
+              role="group"
+              aria-label="Switch between miles and km"
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  if (distanceUnit !== "km") {
+                    setDistanceUnit("km");
+                    localStorage.setItem("nexa_distance_unit", "km");
+                    setPage(1);
+                  }
+                }}
+                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
+                  distanceUnit === "km"
+                    ? "bg-white text-blue-600 shadow-xs font-bold"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+                title="Switch distance unit to Kilometers"
+              >
+                km
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (distanceUnit !== "mi") {
+                    setDistanceUnit("mi");
+                    localStorage.setItem("nexa_distance_unit", "mi");
+                    setPage(1);
+                  }
+                }}
+                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
+                  distanceUnit === "mi"
+                    ? "bg-white text-blue-600 shadow-xs font-bold"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+                title="Switch distance unit to Miles"
+              >
+                mi
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Sort Select */}

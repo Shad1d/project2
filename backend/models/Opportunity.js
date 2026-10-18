@@ -87,13 +87,21 @@ const opportunitySchema = new mongoose.Schema(
     },
     // GeoJSON Point for geospatial queries (e.g. range filtering, nearest distance)
     location: {
-      type: {
-        type: String,
-        enum: ["Point"],
-      },
-      coordinates: {
-        type: [Number], // [longitude, latitude]
-      },
+      type: new mongoose.Schema(
+        {
+          type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point",
+          },
+          coordinates: {
+            type: [Number],
+            required: true,
+          },
+        },
+        { _id: false }
+      ),
+      default: null,
     },
     remoteType: {
       type: String,
@@ -281,7 +289,7 @@ opportunitySchema.index({ lastVerifiedAt: -1 });
 opportunitySchema.index({ skillIds: 1 });
 opportunitySchema.index({ fieldIds: 1 });
 opportunitySchema.index({ organizationKey: 1, titleKey: 1 });
-opportunitySchema.index({ location: "2dsphere" }); // Enables geospatial $geoWithin, $near, and $maxDistance queries
+opportunitySchema.index({ location: "2dsphere" }, { sparse: true }); // Enables geospatial $geoWithin, $near, and $maxDistance queries
 
 // Full-text search index
 opportunitySchema.index(

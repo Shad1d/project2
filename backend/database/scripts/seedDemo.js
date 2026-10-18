@@ -89,6 +89,12 @@ async function seedDemo() {
   const now = new Date();
   const inDays = (days) => new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
+  // Clean up any legacy corrupt GeoJSON documents with empty coordinates
+  await Opportunity.updateMany(
+    { $or: [{ "location.coordinates": { $size: 0 } }, { "location.type": { $exists: false }, location: { $ne: null } }] },
+    { $set: { location: null } }
+  );
+
   // 3. Define sample realistic opportunities
   const sampleData = [
     {
@@ -342,6 +348,7 @@ async function seedDemo() {
 
     const oppDoc = {
       ...item,
+      location: item.location || null,
       categoryId,
       skillIds,
       fieldIds,
